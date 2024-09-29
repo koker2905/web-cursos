@@ -34,12 +34,9 @@
     <script src="script.js"></script>
    </body>
 
+  
 
-
-
-
-
-   <style>
+   <style> /* --------------------------------------------------------------- */
     body {
         font-family: Arial, sans-serif;
         margin: 0;
@@ -93,39 +90,176 @@
     }
 
     .curso {
-    border: 1px solid #ddd;
-    padding: 15px;
-    margin-bottom: 10px;
-    transition: transform 0.3s;
-    }   
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        transition: transform 0.3s;
+    }
 
     .curso:hover {
     transform: scale(1.02);
     }
 
+    .informacion {
+        flex: 1;
+    }
+
+    .descripcion {
+        margin-left: 20px;
+        display: none; /* Inicialmente oculta */
+    }
+
     button {
-    background-color: #000000;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        cursor: pointer;
+        transition: background-color 0.3s;
     }
 
     button:hover {
-    background-color: #0a0a0a;
+        background-color: #218838;
+    }
+
+    .btn-eliminar {
+        background-color: #dc3545;
+    }
+
+    .btn-eliminar:hover {
+        background-color: #c82333;
     }
 
     /* Responsividad */
     @media (max-width: 600px) {
-    nav ul li {
-        display: block;
-        margin-bottom: 10px;
-    }
-    }
+        nav ul li {
+            display: block;
+            margin-bottom: 10px;
+        }
 
-    
-        </style>
+        .curso {
+            flex-direction: column; /* Apilar en móviles */
+        }
+
+        .descripcion {
+            margin-left: 0; /* Alinear descripción */
+            margin-top: 10px;
+            }
+        }/* --------------------------------------------------------------- */
+    </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const listaCursos = document.getElementById("lista-cursos");
+            const formCurso = document.getElementById("form-curso");
+            const contenido = document.getElementById("contenido");
+
+            // Inicializar
+            mostrarInicio();
+
+            // Navegación
+            document.getElementById("inicio-link").addEventListener("click", mostrarInicio);
+            document.getElementById("cursos-link").addEventListener("click", mostrarCursos);
+            document.getElementById("agregar-curso-link").addEventListener("click", mostrarFormulario);
+            document.getElementById("contacto-link").addEventListener("click", mostrarContacto);
+
+            // Cargar cursos desde localStorage
+            cargarCursos();
+
+            // Agregar curso
+            formCurso.addEventListener("submit", (e) => {
+                e.preventDefault();
+                agregarCurso();
+            });
+
+            function mostrarInicio() {
+                contenido.innerHTML = `
+                    <h2>Bienvenido a la Gestión de Cursos</h2>
+                    <p>Seleccione una opción de la barra de navegación.</p>
+                `;
+            }
+
+            function mostrarCursos() {
+                contenido.innerHTML = `<h2>Lista de Cursos</h2><div id="lista-cursos"></div>`;
+                cargarCursos();
+            }
+      
+
+            function guardarCurso(curso) {
+                const cursos = obtenerCursos();
+                cursos.push(curso);
+                localStorage.setItem("cursos", JSON.stringify(cursos));
+            }
+
+            function obtenerCursos() {
+                const cursos = localStorage.getItem("cursos");
+                return cursos ? JSON.parse(cursos) : [];
+            }
+
+            function cargarCursos() {
+                const cursos = obtenerCursos();
+                
+                // Agregar cursos por defecto
+                const cursosPorDefecto = [
+                    { nombre: "Matemáticas", instructor: "Juan Pérez", fecha: "2024-10-01", duracion: "40", descripcion: "Curso de matemáticas básicas y avanzadas." },
+                    { nombre: "Inglés", instructor: "María López", fecha: "2024-10-15", duracion: "30", descripcion: "Curso de inglés para principiantes." }
+                ];
+                
+                // Combinar cursos por defecto con los guardados
+                const todosLosCursos = cursosPorDefecto.concat(cursos);
+                
+                todosLosCursos.forEach(curso => {
+                    crearElementoCurso(curso);
+                });
+            }
+
+            function crearElementoCurso(curso) {
+                const div = document.createElement("div");
+                div.classList.add("curso");
+                div.innerHTML = `
+                    <div class="informacion">
+                        <h3>${curso.nombre}</h3>
+                        <p><strong>Instructor:</strong> ${curso.instructor}</p>
+                        <p><strong>Fecha de Inicio:</strong> ${curso.fecha}</p>
+                        <p><strong>Duración:</strong> ${curso.duracion} horas</p>
+                        <button class="detalle-btn">Ver más detalles</button>
+                        <button class="btn-eliminar">Eliminar</button>
+                    </div>
+                    <div class="descripcion">
+                        <p><strong> <br> Descripcion:</strong> ${curso.descripcion}</p>
+                    </div>
+                `;
+                
+                // Añadir evento para mostrar/ocultar la descripción
+                const detalleBtn = div.querySelector('.detalle-btn');
+                detalleBtn.addEventListener('click', () => {
+                    const descripcionDiv = div.querySelector('.descripcion');
+                    descripcionDiv.style.display = descripcionDiv.style.display === 'none' ? 'block' : 'none';
+                });
+
+                // Añadir evento para eliminar curso
+                const eliminarBtn = div.querySelector('.btn-eliminar');
+                eliminarBtn.addEventListener('click', () => {
+                    eliminarCurso(curso);
+                    div.remove(); // Eliminar el elemento de la vista
+                });
+                
+                document.getElementById("lista-cursos").appendChild(div);
+            }
+
+            function eliminarCurso(curso) {
+                const cursos = obtenerCursos().filter(c => c.nombre !== curso.nombre);
+                localStorage.setItem("cursos", JSON.stringify(cursos));
+            }
+        });
+    </script>
+
+
+
+
 
    
 </html>
