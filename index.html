@@ -152,109 +152,166 @@
     </style>
 
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const listaCursos = document.getElementById("lista-cursos");
-            const formCurso = document.getElementById("form-curso");
-            const contenido = document.getElementById("contenido");
+ document.addEventListener("DOMContentLoaded", () => {
+    const contenido = document.getElementById("contenido");
 
-            // Inicializar
-            mostrarInicio();
+    // Inicializar la vista de inicio
+    mostrarInicio();
 
-            // Navegación
-            document.getElementById("inicio-link").addEventListener("click", mostrarInicio);
-            document.getElementById("cursos-link").addEventListener("click", mostrarCursos);
-            document.getElementById("agregar-curso-link").addEventListener("click", mostrarFormulario);
-            document.getElementById("contacto-link").addEventListener("click", mostrarContacto);
+    // Navegación
+    document.getElementById("inicio-link").addEventListener("click", mostrarInicio);
+    document.getElementById("cursos-link").addEventListener("click", mostrarCursos);
+    document.getElementById("agregar-curso-link").addEventListener("click", mostrarFormulario);
+    document.getElementById("contacto-link").addEventListener("click", mostrarContacto);
 
-            // Cargar cursos desde localStorage
-            cargarCursos();
+    // Cursos precargados por defecto
+    const cursosPreCargados = [
+        { nombre: "Matemáticas", instructor: "Juan Pérez", fecha: "2024-10-01", duracion: "40", descripcion: "Curso de matemáticas básicas y avanzadas." },
+        { nombre: "Inglés", instructor: "María López", fecha: "2024-10-15", duracion: "30", descripcion: "Curso de inglés para principiantes." }
+    ];
 
-            // Agregar curso
-            formCurso.addEventListener("submit", (e) => {
-                e.preventDefault();
-                agregarCurso();
-            });
+    // Función para mostrar la vista de inicio
+    function mostrarInicio() {
+        contenido.innerHTML = `
+            <h2>Bienvenido a la Gestión de Cursos</h2>
+            <p>Seleccione una opción de la barra de navegación.</p>
+        `;
+    }
 
-            function mostrarInicio() {
-                contenido.innerHTML = `
-                    <h2>Bienvenido a la Gestión de Cursos</h2>
-                    <p>Seleccione una opción de la barra de navegación.</p>
-                `;
-            }
+    // Función para mostrar los cursos
+    function mostrarCursos() {
+        contenido.innerHTML = `<h2>Lista de Cursos</h2><div id="lista-cursos"></div>`;
+        cargarCursos();
+    }
 
-            function mostrarCursos() {
-                contenido.innerHTML = `<h2>Lista de Cursos</h2><div id="lista-cursos"></div>`;
-                cargarCursos();
-            }
-      
+    // Función para mostrar el formulario
+    function mostrarFormulario() {
+        contenido.innerHTML = `
+            <h2>Agregar Nuevo Curso</h2>
+            <form id="form-curso" style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px; align-items: center;">
+                <label for="nombre">Nombre del Curso:</label>
+                <input type="text" id="nombre" required>
 
-            function guardarCurso(curso) {
-                const cursos = obtenerCursos();
-                cursos.push(curso);
-                localStorage.setItem("cursos", JSON.stringify(cursos));
-            }
+                <label for="instructor">Nombre del Instructor:</label>
+                <input type="text" id="instructor" required>
 
-            function obtenerCursos() {
-                const cursos = localStorage.getItem("cursos");
-                return cursos ? JSON.parse(cursos) : [];
-            }
+                <label for="fecha">Fecha de Inicio:</label>
+                <input type="date" id="fecha" required>
 
-            function cargarCursos() {
-                const cursos = obtenerCursos();
-                
-                // Agregar cursos por defecto
-                const cursosPorDefecto = [
-                    { nombre: "Matemáticas", instructor: "Juan Pérez", fecha: "2024-10-01", duracion: "40", descripcion: "Curso de matemáticas básicas y avanzadas." },
-                    { nombre: "Inglés", instructor: "María López", fecha: "2024-10-15", duracion: "30", descripcion: "Curso de inglés para principiantes." }
-                ];
-                
-                // Combinar cursos por defecto con los guardados
-                const todosLosCursos = cursosPorDefecto.concat(cursos);
-                
-                todosLosCursos.forEach(curso => {
-                    crearElementoCurso(curso);
-                });
-            }
+                <label for="duracion">Duración (horas):</label>
+                <input type="number" id="duracion" required>
 
-            function crearElementoCurso(curso) {
-                const div = document.createElement("div");
-                div.classList.add("curso");
-                div.innerHTML = `
-                    <div class="informacion">
-                        <h3>${curso.nombre}</h3>
-                        <p><strong>Instructor:</strong> ${curso.instructor}</p>
-                        <p><strong>Fecha de Inicio:</strong> ${curso.fecha}</p>
-                        <p><strong>Duración:</strong> ${curso.duracion} horas</p>
-                        <button class="detalle-btn">Ver más detalles</button>
-                        <button class="btn-eliminar">Eliminar</button>
-                    </div>
-                    <div class="descripcion">
-                        <p><strong> <br> Descripcion:</strong> ${curso.descripcion}</p>
-                    </div>
-                `;
-                
-                // Añadir evento para mostrar/ocultar la descripción
-                const detalleBtn = div.querySelector('.detalle-btn');
-                detalleBtn.addEventListener('click', () => {
-                    const descripcionDiv = div.querySelector('.descripcion');
-                    descripcionDiv.style.display = descripcionDiv.style.display === 'none' ? 'block' : 'none';
-                });
+                <label for="descripcion">Descripción:</label>
+                <textarea id="descripcion" required></textarea>
 
-                // Añadir evento para eliminar curso
-                const eliminarBtn = div.querySelector('.btn-eliminar');
-                eliminarBtn.addEventListener('click', () => {
-                    eliminarCurso(curso);
-                    div.remove(); // Eliminar el elemento de la vista
-                });
-                
-                document.getElementById("lista-cursos").appendChild(div);
-            }
+                <div></div> <!-- Este div es para que el botón ocupe toda la segunda columna -->
+                <button type="submit">Agregar Curso</button>
+            </form>
+        `;
 
-            function eliminarCurso(curso) {
-                const cursos = obtenerCursos().filter(c => c.nombre !== curso.nombre);
-                localStorage.setItem("cursos", JSON.stringify(cursos));
-            }
+        // Asignar el event listener al formulario recién creado
+        const formCurso = document.getElementById("form-curso");
+        formCurso.addEventListener("submit", (e) => {
+            e.preventDefault();
+            agregarCurso();
         });
+    }
+
+    // Función para mostrar la vista de contacto
+    function mostrarContacto() {
+        contenido.innerHTML = `
+            <h2>Contacto</h2>
+            <p>Para más información, contáctenos en info@cursos.com</p>
+        `;
+    }
+
+    // Función para agregar un curso
+    function agregarCurso() {
+        const nombre = document.getElementById("nombre").value;
+        const instructor = document.getElementById("instructor").value;
+        const fecha = document.getElementById("fecha").value;
+        const duracion = document.getElementById("duracion").value;
+        const descripcion = document.getElementById("descripcion").value;
+
+        const curso = { nombre, instructor, fecha, duracion, descripcion };
+
+        // Guardar en localStorage
+        guardarCurso(curso);
+
+        // Actualizar la lista
+        mostrarCursos();
+    }
+
+    // Función para guardar un curso en localStorage
+    function guardarCurso(curso) {
+        const cursos = obtenerCursos();
+        cursos.push(curso);
+        localStorage.setItem("cursos", JSON.stringify(cursos));
+    }
+
+    // Función para obtener los cursos de localStorage
+    function obtenerCursos() {
+        const cursos = localStorage.getItem("cursos");
+        return cursos ? JSON.parse(cursos) : [];
+    }
+
+    // Función para cargar los cursos desde localStorage y mostrar los precargados
+    function cargarCursos() {
+        const cursosGuardados = obtenerCursos();
+        const todosLosCursos = [...cursosPreCargados, ...cursosGuardados];
+        const listaCursos = document.getElementById("lista-cursos");
+
+        // Limpiar la lista antes de cargar nuevos cursos
+        if (listaCursos) listaCursos.innerHTML = "";
+
+        todosLosCursos.forEach(curso => {
+            crearElementoCurso(curso);
+        });
+    }
+
+    // Función para crear un elemento visual para cada curso
+    function crearElementoCurso(curso) {
+        const div = document.createElement("div");
+        div.classList.add("curso");
+        div.innerHTML = `
+            <div class="informacion">
+                <h3>${curso.nombre}</h3>
+                <p><strong>Instructor:</strong> ${curso.instructor}</p>
+                <p><strong>Fecha de Inicio:</strong> ${curso.fecha}</p>
+                <p><strong>Duración:</strong> ${curso.duracion} horas</p>
+                <button class="detalle-btn">Ver más detalles</button>
+                <button class="btn-eliminar">Eliminar</button>
+            </div>
+            <div class="descripcion">
+                <p><strong>Descripción:</strong> ${curso.descripcion}</p>
+            </div>
+        `;
+
+        // Añadir evento para mostrar/ocultar la descripción
+        const detalleBtn = div.querySelector('.detalle-btn');
+        detalleBtn.addEventListener('click', () => {
+            const descripcionDiv = div.querySelector('.descripcion');
+            descripcionDiv.style.display = descripcionDiv.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // Añadir evento para eliminar el curso
+        const eliminarBtn = div.querySelector('.btn-eliminar');
+        eliminarBtn.addEventListener('click', () => {
+            eliminarCurso(curso);
+            div.remove(); // Eliminar el elemento de la vista
+        });
+
+        document.getElementById("lista-cursos").appendChild(div);
+    }
+
+    // Función para eliminar un curso
+    function eliminarCurso(curso) {
+        const cursos = obtenerCursos().filter(c => c.nombre !== curso.nombre);
+        localStorage.setItem("cursos", JSON.stringify(cursos));
+    }
+});
+
+
     </script>
 
 
